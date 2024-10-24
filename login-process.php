@@ -9,7 +9,7 @@ $password = $_POST['password'];
 
 // Check if the credentials are correct
 if ($username === $correct_username && $password === $correct_password) {
-    // Redirect to flag page
+    // Redirect to flag page if credentials are correct
     header("Location: flag.html");
     exit();
 } else {
