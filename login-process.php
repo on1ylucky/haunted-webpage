@@ -1,41 +1,48 @@
 <?php
+// login-process.php
+// IMPORTANT: no whitespace or BOM before this opening tag
+
 session_start();
 
-/*
-  CTF intent:
-  - Username is hidden in ghost.html (view-source)
-  - Password is base64 in haunted.js (DevTools)
-  - We verify on the server; no direct flag access without session
-*/
-
+// Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  http_response_code(405);
-  header('Allow: POST');
-  echo "<h1 style='color:white;background:black;text-align:center;padding:60px'>Method Not Allowed</h1>";
-  exit;
+    http_response_code(405);
+    header('Allow: POST');
+    echo "Method Not Allowed";
+    exit;
 }
 
-// Pull submitted creds
+// Basic input retrieval + trimming
 $u = isset($_POST['username']) ? trim($_POST['username']) : '';
 $p = isset($_POST['password']) ? trim($_POST['password']) : '';
 
-// The expected values (match the puzzle files)
+// Replace with your expected values for the CTF
 $EXPECTED_USER = 'ghostbuster24';
 $EXPECTED_PASS = 'h4untedh4cker10';
 
-// Compare (exact match for this CTF)
+// Simple authentication (CTF usage — ok). Use hashes for production.
 if ($u === $EXPECTED_USER && $p === $EXPECTED_PASS) {
-  session_regenerate_id(true);
-  $_SESSION['logged_in'] = true;
-  $_SESSION['player'] = htmlspecialchars($u, ENT_QUOTES|ENT_HTML5, 'UTF-8');
-  header('Location: flag.php');
-  exit;
+    // regenerate id first for session fixation protection
+    session_regenerate_id(true);
+
+    // set session markers that flag.php will check
+    $_SESSION['logged_in'] = true;
+    $_SESSION['player'] = htmlspecialchars($u, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+    // redirect to protected page
+    header('Location: flag.php');
+    exit;
 }
 
+// Authentication failed
 http_response_code(401);
-echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Access Denied</title></head>
-<body style='background:black;color:white;text-align:center;padding:80px;font-family:monospace'>
-<h1>Access Denied</h1>
-<p>The spirits do not recognize you...</p>
-<p><a href='login.html' style='color:#ff6347'>Return to login</a></p>
-</body></html>";
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Access Denied</title></head>
+<body style="background:black;color:white;text-align:center;padding:60px;font-family:monospace;">
+  <h1>Access Denied</h1>
+  <p>The spirits do not recognize you...</p>
+  <p><a href="login.html" style="color:#ff6347">Return to login</a></p>
+</body>
+</html>
