@@ -1,28 +1,29 @@
 <?php
 session_start();
-
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: login.html');
-    exit();
+if (empty($_SESSION['logged_in'])) {
+  header('Location: login.html');
+  exit;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Flag</title>
-<style>
-body { background:black; color:white; text-align:center; padding-top:100px; font-family:monospace; }
-.flagbox { display:inline-block; padding:20px; background:rgba(0,0,0,0.8); border-radius:8px; }
-.flag { margin-top:12px; padding:10px; background:#111; border-radius:6px; display:inline-block; color:#ffdf5d; font-weight:bold; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flag</title>
+  <style>
+    body{background:#000;color:#fff;text-align:center;padding:90px 16px;font-family:'Courier New',monospace}
+    .box{display:inline-block;padding:24px;background:rgba(0,0,0,.75);border-radius:10px}
+    .flag{margin-top:10px;display:inline-block;padding:10px 14px;background:#111;border-radius:8px;color:#ffdf5d;font-weight:700}
+    a{color:#ff6347}
+  </style>
 </head>
 <body>
-<div class="flagbox">
+  <div class="box">
     <h1>Congratulations!</h1>
-    <p>You have passed the spectral gate.</p>
+    <p>You have passed the spectral gate, <?php echo $_SESSION['player'] ?? 'traveler'; ?>.</p>
     <div class="flag">The flag is: <code>hackoween{f0und m3}</code></div>
-    <p style="margin-top:16px;"><a href="logout.php" style="color:#ff6347;text-decoration:none;">Log out</a></p>
-</div>
+    <p style="margin-top:14px"><a href="logout.php">Log out</a></p>
+  </div>
 </body>
 </html>
