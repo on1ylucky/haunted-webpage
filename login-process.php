@@ -1,66 +1,41 @@
 <?php
-// login-process.php
 session_start();
 
-// === CONFIG: location of server-only credential store ===
-// Put this file outside the web root if possible.
-// Example: if webroot is /var/www/html, place creds at /var/www/.ctf_credentials.json
-$creds_path = dirname(__DIR__) . '/.ctf_credentials.json'; // one level up from webroot
-// If you must keep it in project, use: __DIR__ . '/.ctf_credentials.json' and ensure .gitignore blocks it.
-
-if (!file_exists($creds_path)) {
-    http_response_code(500);
-    echo "<h1>Server config error</h1><p>Credential store not found.</p>";
-    exit();
-}
+/*
+  CTF intent:
+  - Username is hidden in ghost.html (view-source)
+  - Password is base64 in haunted.js (DevTools)
+  - We verify on the server; no direct flag access without session
+*/
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    header('Allow: POST');
-    echo "<h1>Method Not Allowed</h1>";
-    exit();
+  http_response_code(405);
+  header('Allow: POST');
+  echo "<h1 style='color:white;background:black;text-align:center;padding:60px'>Method Not Allowed</h1>";
+  exit;
 }
 
-// Read JSON credential store (username_hash & password_hash)
-$creds_json = file_get_contents($creds_path);
-$creds = json_decode($creds_json, true);
+// Pull submitted creds
+$u = isset($_POST['username']) ? trim($_POST['username']) : '';
+$p = isset($_POST['password']) ? trim($_POST['password']) : '';
 
-if (!is_array($creds) || empty($creds['username_hash']) || empty($creds['password_hash'])) {
-    http_response_code(500);
-    echo "<h1>Server config error</h1><p>Credential store malformed.</p>";
-    exit();
+// The expected values (match the puzzle files)
+$EXPECTED_USER = 'ghostbuster24';
+$EXPECTED_PASS = 'h4untedh4cker10';
+
+// Compare (exact match for this CTF)
+if ($u === $EXPECTED_USER && $p === $EXPECTED_PASS) {
+  session_regenerate_id(true);
+  $_SESSION['logged_in'] = true;
+  $_SESSION['player'] = htmlspecialchars($u, ENT_QUOTES|ENT_HTML5, 'UTF-8');
+  header('Location: flag.php');
+  exit;
 }
 
-// Basic sanitization (trim)
-$raw_username = isset($_POST['username']) ? trim($_POST['username']) : '';
-$raw_password = isset($_POST['password']) ? trim($_POST['password']) : '';
-
-if ($raw_username === '' || $raw_password === '') {
-    http_response_code(400);
-    echo "<h1>Bad Request</h1><p>Provide both username and password.</p>";
-    exit();
-}
-
-// Verify using password_verify against stored hashes
-$username_ok = password_verify($raw_username, $creds['username_hash']);
-$password_ok = password_verify($raw_password, $creds['password_hash']);
-
-if ($username_ok && $password_ok) {
-    // Login success
-    session_regenerate_id(true);
-    $_SESSION['logged_in'] = true;
-    $_SESSION['username_display'] = htmlspecialchars($raw_username, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-    header('Location: flag.php');
-    exit();
-}
-
-// Failed login
 http_response_code(401);
-echo "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Access Denied</title></head><body style='background:black;color:white;text-align:center;padding-top:80px;font-family:monospace;'>";
-echo "<h1>Access Denied</h1>";
-echo "<p>The spirits do not recognize you...</p>";
-echo "<p><a href='login.html' style='color:#ff6347;text-decoration:none;'>Return to login</a></p>";
-echo "</body></html>";
-exit();
-?>
+echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Access Denied</title></head>
+<body style='background:black;color:white;text-align:center;padding:80px;font-family:monospace'>
+<h1>Access Denied</h1>
+<p>The spirits do not recognize you...</p>
+<p><a href='login.html' style='color:#ff6347'>Return to login</a></p>
+</body></html>";
