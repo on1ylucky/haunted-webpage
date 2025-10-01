@@ -1,0 +1,3 @@
+# .gitignore
+.ctf_credentials.json
+.env
