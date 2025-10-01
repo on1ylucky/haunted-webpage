@@ -1,41 +1,32 @@
-<?php
-session_start();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Haunted Login</title>
+  <style>
+    body{background:#000;color:#fff;text-align:center;padding:90px 16px;font-family:'Courier New',monospace}
+    .box{display:inline-block;padding:24px;background:rgba(0,0,0,.75);border-radius:10px}
+    label,input{display:block;margin:8px auto}
+    input[type="text"],input[type="password"]{width:240px;padding:8px;border:1px solid #333;background:#111;color:#fff;border-radius:6px}
+    button{margin-top:12px;padding:8px 16px;border:none;border-radius:6px;background:#ff6347;color:#000;font-weight:700;cursor:pointer}
+    a{color:#ff6347}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Only the spirits may enter</h1>
+    <form method="post" action="login-process.php" autocomplete="off" novalidate>
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" required />
 
-/*
-  CTF intent:
-  - Username is hidden in ghost.html (view-source)
-  - Password is base64 in haunted.js (DevTools)
-  - We verify on the server; no direct flag access without session
-*/
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required />
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  http_response_code(405);
-  header('Allow: POST');
-  echo "<h1 style='color:white;background:black;text-align:center;padding:60px'>Method Not Allowed</h1>";
-  exit;
-}
-
-// Pull submitted creds
-$u = isset($_POST['username']) ? trim($_POST['username']) : '';
-$p = isset($_POST['password']) ? trim($_POST['password']) : '';
-
-// The expected values (match the puzzle files)
-$EXPECTED_USER = 'ghostbuster24';
-$EXPECTED_PASS = 'h4untedh4cker10';
-
-// Compare (exact match for this CTF)
-if ($u === $EXPECTED_USER && $p === $EXPECTED_PASS) {
-  session_regenerate_id(true);
-  $_SESSION['logged_in'] = true;
-  $_SESSION['player'] = htmlspecialchars($u, ENT_QUOTES|ENT_HTML5, 'UTF-8');
-  header('Location: flag.php');
-  exit;
-}
-
-http_response_code(401);
-echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Access Denied</title></head>
-<body style='background:black;color:white;text-align:center;padding:80px;font-family:monospace'>
-<h1>Access Denied</h1>
-<p>The spirits do not recognize you...</p>
-<p><a href='login.html' style='color:#ff6347'>Return to login</a></p>
-</body></html>";
+      <button type="submit">Enter</button>
+    </form>
+    <p style="margin-top:12px;color:#bbb">Hints lurk in the site’s shadows…</p>
+  </div>
+  <script src="haunted.js"></script>
+</body>
+</html>
